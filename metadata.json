@@ -1,0 +1,6 @@
+{
+  "name": "Style & Shelf",
+  "description": "Curated affiliate product discovery platform for beauty, fashion, and lifestyle finds in India.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
