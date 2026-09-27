@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   Plus, Edit3, Trash2, Search, Filter, Sparkles, Flame, Tag, 
   ExternalLink, ArrowLeft, LogOut, CheckCircle2, AlertCircle, 
-  Image as ImageIcon, RefreshCw, X, ShieldCheck, Eye, Store
+  Image as ImageIcon, RefreshCw, X, ShieldCheck, Eye, Store, Camera
 } from 'lucide-react';
 import { Product, ProductCategory } from '../types';
 import { User } from 'firebase/auth';
@@ -12,6 +12,7 @@ import {
   removeProductFromStore, 
   resetCatalogToDefaults 
 } from '../lib/productStore';
+import { PhotoUploader } from './PhotoUploader';
 
 interface AdminDashboardProps {
   products: Product[];
@@ -118,7 +119,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     discount: 33,
     rating: 4.6,
     reviews: 120,
-    image: SAMPLE_IMAGE_PRESETS[0].url,
+    image: '',
     description: '',
     store: 'Amazon',
     customStore: '',
@@ -147,7 +148,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   const openAddModal = () => {
     setEditingProduct(null);
-    setFormData(defaultFormData);
+    setFormData({
+      ...defaultFormData,
+      image: ''
+    });
     setIsModalOpen(true);
   };
 
@@ -198,6 +202,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     const highlightsArray = formData.highlights
       ? formData.highlights.split(',').map(h => h.trim()).filter(Boolean)
       : ['100% Authentic Retailer Deal'];
+
+    if (!formData.image || !formData.image.trim()) {
+      showNotification('Please upload a product photo before saving.');
+      return;
+    }
 
     if (editingProduct) {
       // Update existing
@@ -807,44 +816,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </div>
               </div>
 
-              {/* Image URL & Preset Samples */}
-              <div>
-                <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">
-                  Product Image URL *
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="url"
-                    required
-                    placeholder="https://images.unsplash.com/..."
-                    value={formData.image}
-                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                    className="flex-1 p-2.5 bg-[#FAF6F6] border border-rose-200 rounded-xl focus:bg-white focus:outline-none"
-                  />
-                  {formData.image && (
-                    <img
-                      src={formData.image}
-                      alt="preview"
-                      className="w-10 h-10 object-cover rounded-lg border border-stone-200 shrink-0"
-                    />
-                  )}
-                </div>
-
-                {/* Preset image suggestions */}
-                <div className="flex items-center gap-1.5 flex-wrap mt-2">
-                  <span className="text-[10px] text-stone-400 uppercase font-bold">Quick presets:</span>
-                  {SAMPLE_IMAGE_PRESETS.map((preset) => (
-                    <button
-                      key={preset.label}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, image: preset.url })}
-                      className="text-[11px] px-2 py-0.5 rounded-full bg-stone-100 hover:bg-rose-50 hover:text-[#8E3B52] text-stone-600 transition-colors"
-                    >
-                      {preset.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              {/* Product Photo Upload Access */}
+              <PhotoUploader
+                value={formData.image}
+                onChange={(photoUrl) => setFormData({ ...formData, image: photoUrl })}
+                required
+                presets={SAMPLE_IMAGE_PRESETS}
+              />
 
               {/* Description */}
               <div>

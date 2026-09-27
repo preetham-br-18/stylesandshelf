@@ -13,6 +13,7 @@ import {
   updateProductInStore, 
   removeProductFromStore 
 } from '../lib/productStore';
+import { PhotoUploader } from './PhotoUploader';
 
 interface StoreViewProps {
   products: Product[];
@@ -125,7 +126,7 @@ export const StoreView: React.FC<StoreViewProps> = ({
     discount: 33,
     rating: 4.5,
     reviews: 120,
-    image: CURATED_IMAGE_PRESETS[0].url,
+    image: '',
     description: '',
     store: 'Amazon',
     customStore: '',
@@ -288,6 +289,11 @@ export const StoreView: React.FC<StoreViewProps> = ({
     const highlightsArray = formData.highlights
       ? formData.highlights.split(',').map(h => h.trim()).filter(Boolean)
       : ['100% Genuine Retailer Item'];
+
+    if (!formData.image || !formData.image.trim()) {
+      showToast('Please upload a product photo before saving.');
+      return;
+    }
 
     if (editingProduct) {
       // Update existing product
@@ -829,50 +835,13 @@ export const StoreView: React.FC<StoreViewProps> = ({
                 />
               </div>
 
-              {/* Product Image URL & Presets */}
-              <div>
-                <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">
-                  Product Image URL *
-                </label>
-                <div className="flex gap-3 items-center mb-2">
-                  <input
-                    type="url"
-                    required
-                    placeholder="https://images.unsplash.com/..."
-                    value={formData.image}
-                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                    className="flex-1 p-2.5 bg-[#FAF6F6] border border-rose-200 rounded-xl text-xs font-mono focus:bg-white focus:outline-none"
-                  />
-                  {formData.image && (
-                    <div className="w-10 h-10 rounded-lg overflow-hidden border border-rose-200 shrink-0 bg-stone-100">
-                      <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
-                    </div>
-                  )}
-                </div>
-
-                {/* Quick Presets Picker */}
-                <div>
-                  <span className="text-[10px] text-stone-500 font-semibold uppercase tracking-wider block mb-1.5">
-                    Or select a curated preset photo:
-                  </span>
-                  <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-1.5 bg-[#FAF6F6] rounded-xl border border-rose-100">
-                    {CURATED_IMAGE_PRESETS.map((preset) => (
-                      <button
-                        key={preset.label}
-                        type="button"
-                        onClick={() => setFormData({ ...formData, image: preset.url })}
-                        className={`text-[11px] px-2 py-1 rounded-md transition-colors ${
-                          formData.image === preset.url
-                            ? 'bg-[#8E3B52] text-white font-semibold'
-                            : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-50'
-                        }`}
-                      >
-                        {preset.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              {/* Product Photo Upload Access */}
+              <PhotoUploader
+                value={formData.image}
+                onChange={(photoUrl) => setFormData({ ...formData, image: photoUrl })}
+                required
+                presets={CURATED_IMAGE_PRESETS}
+              />
 
               {/* Description */}
               <div>
